@@ -288,7 +288,7 @@ func TestMiddleware_RedirectsCorrectly(t *testing.T) {
 			},
 			wantStatus:      http.StatusFound,
 			wantRedirect:    true,
-			wantRedirectURL: "http://blah.meh/callback",
+			wantRedirectURL: "http://test.com/callback",
 		},
 		{
 			desc:    "redirects with relative redirect scheme",
@@ -302,7 +302,7 @@ func TestMiddleware_RedirectsCorrectly(t *testing.T) {
 			},
 			wantStatus:      http.StatusFound,
 			wantRedirect:    true,
-			wantRedirectURL: "https://example.com/callback",
+			wantRedirectURL: "http://example.com/callback",
 		},
 		{
 			desc:    "returns unauthorized if method is PUT",
@@ -409,7 +409,7 @@ func TestMiddleware_RedirectsCorrectly(t *testing.T) {
 
 			test.request.Header.Add("X-Forwarded-Method", test.request.Method)
 			test.request.Header.Add("X-Forwarded-Proto", "http")
-			test.request.Header.Add("X-Forwarded-Host", test.request.Host)
+			test.request.Header.Add("X-Forwarded-Host", "test.com")
 			test.request.Header.Add("X-Forwarded-URI", test.request.URL.RequestURI())
 
 			w := httptest.NewRecorder()

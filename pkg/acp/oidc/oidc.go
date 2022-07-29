@@ -571,16 +571,14 @@ func resolveURL(r *http.Request, u string) string {
 		return u
 	}
 
-	scheme := "http"
-	if r.TLS != nil {
-		scheme = "https"
-	}
+	proto := r.Header.Get("X-Forwarded-Proto")
 
 	if u[0] == '/' {
-		return scheme + "://" + r.Host + u
+		host := r.Header.Get("X-Forwarded-Host")
+		return proto + "://" + host + u
 	}
 
-	return scheme + "://" + u
+	return proto + "://" + u
 }
 
 func isURL(originalURL, otherURL string) bool {
