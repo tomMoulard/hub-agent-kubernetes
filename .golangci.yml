@@ -210,6 +210,24 @@ issues:
     - path: pkg/crd/api/hub/v1alpha1/edge_ingress.go
       linters:
         - gosec # sha1 is not used to encrypt data, no security issue
+    - text: "O_WRONLY|O_RDWR|O_CREATE|O_TRUNC|O_APPEND"
+      linters:
+        - nosnakecase
+    - path: pkg/acp/oidc/oidc.go
+      text: "Function 'ServeHTTP' has too many statements"
+      linters:
+        - funlen
+    # Reducing cyclomatic complexity would reduce readability.
+    - path: pkg/acp/oidc/oidc.go
+      text: "cyclomatic complexity 20 of func `(.*).ServeHTTP` is high"
+      linters:
+        - gocyclo
+    - path: pkg/acp/oidc/http.go
+      linters:
+        - gosec
+    - path: pkg/acp/oidc/oidc_test.go
+      linters:
+        - gosec
     - path: pkg/platform/client_test.go
       linters:
         - gocognit
