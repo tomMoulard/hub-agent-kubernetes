@@ -27,42 +27,42 @@ import (
 
 // Config holds the configuration for the OIDC middleware.
 type Config struct {
-	Issuer       string `json:"issuer,omitempty"  toml:"issuer,omitempty" yaml:"issuer,omitempty"`
-	ClientID     string `json:"clientId,omitempty"  toml:"clientId,omitempty" yaml:"clientId,omitempty"`
-	ClientSecret string `json:"clientSecret,omitempty"  toml:"clientSecret,omitempty" yaml:"clientSecret,omitempty"`
-	TLS          *TLS   `json:"tls,omitempty" toml:"tls,omitempty" yaml:"tls,omitempty"`
+	Issuer       string
+	ClientID     string
+	ClientSecret string
+	TLS          *TLS
 
-	RedirectURL string            `json:"redirectUrl,omitempty"  toml:"redirectUrl,omitempty" yaml:"redirectUrl,omitempty"`
-	LogoutURL   string            `json:"logoutUrl,omitempty"  toml:"logoutUrl,omitempty" yaml:"logoutUrl,omitempty"`
-	Scopes      []string          `json:"scopes,omitempty" toml:"scopes,omitempty" yaml:"scopes,omitempty"`
-	AuthParams  map[string]string `json:"authParams,omitempty" toml:"authParams,omitempty" yaml:"authParams,omitempty"`
-	StateCookie *AuthStateCookie  `json:"stateCookie,omitempty" toml:"stateCookie,omitempty" yaml:"stateCookie,omitempty"`
-	Session     *AuthSession      `json:"session,omitempty" toml:"session,omitempty" yaml:"session,omitempty"`
+	RedirectURL string
+	LogoutURL   string
+	Scopes      []string
+	AuthParams  map[string]string
+	StateCookie *AuthStateCookie
+	Session     *AuthSession
 
 	// ForwardHeaders defines headers that should be added to the request and populated with values extracted from the ID token.
-	ForwardHeaders map[string]string `json:"forwardHeaders,omitempty" toml:"forwardHeaders,omitempty" yaml:"forwardHeaders,omitempty"`
+	ForwardHeaders map[string]string
 	// Claims defines an expression to perform validation on the ID token. For example:
 	//     Equals(`grp`, `admin`) && Equals(`scope`, `deploy`)
-	Claims string `json:"claims,omitempty" toml:"claims,omitempty" yaml:"claims,omitempty"`
+	Claims string
 }
 
 // AuthStateCookie carries the state cookie configuration.
 type AuthStateCookie struct {
-	Secret   string `json:"secret,omitempty" toml:"secret,omitempty" yaml:"secret,omitempty"`
-	Path     string `json:"path,omitempty" toml:"path,omitempty" yaml:"path,omitempty"`
-	Domain   string `json:"domain,omitempty" toml:"domain,omitempty" yaml:"domain,omitempty"`
-	SameSite string `json:"sameSite,omitempty" toml:"sameSite,omitempty" yaml:"sameSite,omitempty"`
-	Secure   bool   `json:"secure,omitempty" toml:"secure,omitempty" yaml:"secure,omitempty"`
+	Secret   string
+	Path     string
+	Domain   string
+	SameSite string
+	Secure   bool
 }
 
 // AuthSession carries session and session cookie configuration.
 type AuthSession struct {
-	Secret   string `json:"secret,omitempty" toml:"secret,omitempty" yaml:"secret,omitempty"`
-	Path     string `json:"path,omitempty" toml:"path,omitempty" yaml:"path,omitempty"`
-	Domain   string `json:"domain,omitempty" toml:"domain,omitempty" yaml:"domain,omitempty"`
-	SameSite string `json:"sameSite,omitempty" toml:"sameSite,omitempty" yaml:"sameSite,omitempty"`
-	Secure   bool   `json:"secure,omitempty" toml:"secure,omitempty" yaml:"secure,omitempty"`
-	Refresh  *bool  `json:"refresh,omitempty" toml:"refresh,omitempty" yaml:"refresh,omitempty"`
+	Secret   string
+	Path     string
+	Domain   string
+	SameSite string
+	Secure   bool
+	Refresh  *bool
 }
 
 // ApplyDefaultValues applies default values on the given dynamic configuration.
