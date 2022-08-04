@@ -19,7 +19,6 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -31,6 +30,7 @@ import (
 	"github.com/traefik/hub-agent-kubernetes/pkg/acp/jwt"
 	"github.com/traefik/hub-agent-kubernetes/pkg/acp/oidc"
 	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // NOTE: if we use the same watcher for all resources, then we need to restart it when new CRDs are
@@ -48,15 +48,18 @@ type Watcher struct {
 	refresh chan struct{}
 
 	switcher *HTTPHandlerSwitcher
+
+	clientSet *kubernetes.Clientset
 }
 
 // NewWatcher returns a new watcher to track ACP resources. It calls the given Updater when an ACP is modified at most
 // once every throttle.
-func NewWatcher(switcher *HTTPHandlerSwitcher) *Watcher {
+func NewWatcher(switcher *HTTPHandlerSwitcher, clientSet *kubernetes.Clientset) *Watcher {
 	return &Watcher{
-		configs:  make(map[string]*acp.Config),
-		refresh:  make(chan struct{}, 1),
-		switcher: switcher,
+		configs:   make(map[string]*acp.Config),
+		refresh:   make(chan struct{}, 1),
+		switcher:  switcher,
+		clientSet: clientSet,
 	}
 }
 
@@ -109,7 +112,7 @@ func (w *Watcher) OnAdd(obj interface{}) {
 	}
 
 	w.configsMu.Lock()
-	w.configs[v.ObjectMeta.Name] = acp.ConfigFromPolicy(v)
+	w.configs[v.ObjectMeta.Name] = acp.ConfigFromPolicy(v, w.clientSet)
 	w.configsMu.Unlock()
 
 	select {
@@ -129,7 +132,7 @@ func (w *Watcher) OnUpdate(_, newObj interface{}) {
 		return
 	}
 
-	cfg := acp.ConfigFromPolicy(v)
+	cfg := acp.ConfigFromPolicy(v, w.clientSet)
 
 	w.configsMu.Lock()
 	w.configs[v.ObjectMeta.Name] = cfg
@@ -198,7 +201,7 @@ func buildRoutes(ctx context.Context, cfgs map[string]*acp.Config) (http.Handler
 			mux.Handle(path, h)
 
 		default:
-			return nil, errors.New("unknown ACP handler type")
+			return nil, fmt.Errorf("unknown handler type for ACP %s", name)
 		}
 	}
 

@@ -30,6 +30,7 @@ type Config struct {
 	Issuer       string
 	ClientID     string
 	ClientSecret string
+	SecretName   string
 	TLS          *TLS
 
 	RedirectURL string
@@ -97,6 +98,10 @@ func ApplyDefaultValues(cfg *Config) {
 
 	if cfg.Session.Refresh == nil {
 		cfg.Session.Refresh = ptrBool(true)
+	}
+
+	if cfg.RedirectURL == "" {
+		cfg.RedirectURL = "/callback"
 	}
 }
 

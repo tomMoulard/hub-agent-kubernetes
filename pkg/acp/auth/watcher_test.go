@@ -43,7 +43,7 @@ func createPolicy(uid, name, ns string) *hubv1alpha1.AccessControlPolicy {
 
 func TestWatcher_OnAdd(t *testing.T) {
 	switcher := NewHandlerSwitcher()
-	watcher := NewWatcher(switcher)
+	watcher := NewWatcher(switcher, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	t.Cleanup(cancel)
@@ -100,7 +100,7 @@ func TestWatcher_OnAdd(t *testing.T) {
 
 func TestWatcher_OnUpdate(t *testing.T) {
 	switcher := NewHandlerSwitcher()
-	watcher := NewWatcher(switcher)
+	watcher := NewWatcher(switcher, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	t.Cleanup(cancel)
@@ -161,7 +161,7 @@ func TestWatcher_OnUpdate(t *testing.T) {
 
 func TestWatcher_OnDelete(t *testing.T) {
 	switcher := NewHandlerSwitcher()
-	watcher := NewWatcher(switcher)
+	watcher := NewWatcher(switcher, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	t.Cleanup(cancel)

@@ -34,6 +34,7 @@ import (
 	"github.com/traefik/hub-agent-kubernetes/pkg/logger"
 	"github.com/traefik/hub-agent-kubernetes/pkg/version"
 	"github.com/urfave/cli/v2"
+	"k8s.io/client-go/kubernetes"
 )
 
 type authServerCmd struct {
@@ -81,8 +82,13 @@ func (c authServerCmd) run(cliCtx *cli.Context) error {
 		return fmt.Errorf("create Hub client set: %w", err)
 	}
 
+	kubeClientSet, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return fmt.Errorf("create Kube client set: %w", err)
+	}
+
 	switcher := auth.NewHandlerSwitcher()
-	acpWatcher := auth.NewWatcher(switcher)
+	acpWatcher := auth.NewWatcher(switcher, kubeClientSet)
 
 	hubInformer := hubinformer.NewSharedInformerFactory(hubClientSet, 5*time.Minute)
 	hubInformer.Hub().V1alpha1().AccessControlPolicies().Informer().AddEventHandler(acpWatcher)

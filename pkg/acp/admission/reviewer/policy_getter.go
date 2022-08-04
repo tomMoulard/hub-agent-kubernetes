@@ -22,6 +22,7 @@ import (
 
 	"github.com/traefik/hub-agent-kubernetes/pkg/acp"
 	hubinformer "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/informers/externalversions"
+	"k8s.io/client-go/kubernetes"
 )
 
 // PolicyGetter allow to get an access control policy configuration.
@@ -31,12 +32,13 @@ type PolicyGetter interface {
 
 // PolGetter implementation the PolicyGetter interface.
 type PolGetter struct {
-	informer hubinformer.SharedInformerFactory
+	informer  hubinformer.SharedInformerFactory
+	clientset *kubernetes.Clientset
 }
 
 // NewPolGetter creates new PolGetter.
-func NewPolGetter(informer hubinformer.SharedInformerFactory) *PolGetter {
-	return &PolGetter{informer: informer}
+func NewPolGetter(informer hubinformer.SharedInformerFactory, clientset *kubernetes.Clientset) *PolGetter {
+	return &PolGetter{informer: informer, clientset: clientset}
 }
 
 // GetConfig gets ACP configuration.
@@ -46,5 +48,5 @@ func (p PolGetter) GetConfig(canonicalName string) (*acp.Config, error) {
 		return nil, fmt.Errorf("get ACP: %w", err)
 	}
 
-	return acp.ConfigFromPolicy(policy), nil
+	return acp.ConfigFromPolicy(policy, p.clientset), nil
 }

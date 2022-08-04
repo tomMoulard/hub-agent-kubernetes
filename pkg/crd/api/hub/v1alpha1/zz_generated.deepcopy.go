@@ -40,8 +40,16 @@ func (in *AccessControlOIDC) DeepCopyInto(out *AccessControlOIDC) {
 			(*out)[key] = val
 		}
 	}
-	out.StateCookie = in.StateCookie
-	in.Session.DeepCopyInto(&out.Session)
+	if in.StateCookie != nil {
+		in, out := &in.StateCookie, &out.StateCookie
+		*out = new(StateCookie)
+		**out = **in
+	}
+	if in.Session != nil {
+		in, out := &in.Session, &out.Session
+		*out = new(Session)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Scopes != nil {
 		in, out := &in.Scopes, &out.Scopes
 		*out = make([]string, len(*in))

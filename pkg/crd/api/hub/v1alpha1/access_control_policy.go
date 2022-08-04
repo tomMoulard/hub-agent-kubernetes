@@ -87,17 +87,19 @@ type AccessControlPolicyBasicAuth struct {
 
 // AccessControlOIDC holds the OIDC authentication configuration.
 type AccessControlOIDC struct {
-	Issuer       string `json:"issuer,omitempty"`
-	ClientID     string `json:"clientId,omitempty"`
+	Issuer   string `json:"issuer,omitempty"`
+	ClientID string `json:"clientId,omitempty"`
+	TLS      *TLS   `json:"tls,omitempty"`
+	// SecretName is the name of the referenced Kubernetes Secret to specify the acp secret data.
+	SecretName   string `json:"secretName,omitempty"`
 	ClientSecret string `json:"clientSecret,omitempty"`
-	TLS          *TLS   `json:"tls,omitempty"`
 
 	RedirectURL string            `json:"redirectUrl,omitempty"`
 	LogoutURL   string            `json:"logoutUrl,omitempty"`
 	AuthParams  map[string]string `json:"authParams,omitempty"`
 
-	StateCookie StateCookie `json:"stateCookie"`
-	Session     Session     `json:"session"`
+	StateCookie *StateCookie `json:"stateCookie,omitempty"`
+	Session     *Session     `json:"session,omitempty"`
 
 	Scopes         []string          `json:"scopes,omitempty"`
 	ForwardHeaders map[string]string `json:"forwardHeaders,omitempty"`
@@ -112,7 +114,7 @@ type TLS struct {
 
 // StateCookie holds state cookie configuration.
 type StateCookie struct {
-	Secret   string `json:"secret"`
+	Secret   string `json:"secret,omitempty"`
 	SameSite string `json:"sameSite,omitempty"`
 	Secure   bool   `json:"secure,omitempty"`
 	Domain   string `json:"domain,omitempty"`
@@ -121,7 +123,7 @@ type StateCookie struct {
 
 // Session holds session configuration.
 type Session struct {
-	Secret   string `json:"secret"`
+	Secret   string `json:"secret,omitempty"`
 	SameSite string `json:"sameSite,omitempty"`
 	Secure   bool   `json:"secure,omitempty"`
 	Domain   string `json:"domain,omitempty"`

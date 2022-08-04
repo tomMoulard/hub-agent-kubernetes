@@ -153,22 +153,6 @@ func TestNewMiddlewareFromSource_ValidatesConfiguration(t *testing.T) {
 			},
 			wantErr: "validate configuration: state secret must be 16, 24 or 32 characters long",
 		},
-		{
-			desc: "empty RedirectURL",
-			cfg: Config{
-				Issuer:       "foo",
-				ClientID:     "bar",
-				ClientSecret: "bar",
-				RedirectURL:  "",
-				StateCookie: &AuthStateCookie{
-					Secret: "secret1234567890",
-				},
-				Session: &AuthSession{
-					Secret: "secret1234567890",
-				},
-			},
-			wantErr: "validate configuration: missing redirect URL",
-		},
 	}
 
 	for _, test := range tests {
