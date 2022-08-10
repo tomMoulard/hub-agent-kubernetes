@@ -30,7 +30,7 @@ import (
 	"github.com/traefik/hub-agent-kubernetes/pkg/acp/jwt"
 	"github.com/traefik/hub-agent-kubernetes/pkg/acp/oidc"
 	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
-	"k8s.io/client-go/kubernetes"
+	clientset "k8s.io/client-go/kubernetes"
 )
 
 // NOTE: if we use the same watcher for all resources, then we need to restart it when new CRDs are
@@ -49,17 +49,17 @@ type Watcher struct {
 
 	switcher *HTTPHandlerSwitcher
 
-	clientSet *kubernetes.Clientset
+	kubeClientSet *clientset.Clientset
 }
 
 // NewWatcher returns a new watcher to track ACP resources. It calls the given Updater when an ACP is modified at most
 // once every throttle.
-func NewWatcher(switcher *HTTPHandlerSwitcher, clientSet *kubernetes.Clientset) *Watcher {
+func NewWatcher(switcher *HTTPHandlerSwitcher, kubeClientset *clientset.Clientset) *Watcher {
 	return &Watcher{
-		configs:   make(map[string]*acp.Config),
-		refresh:   make(chan struct{}, 1),
-		switcher:  switcher,
-		clientSet: clientSet,
+		configs:       make(map[string]*acp.Config),
+		refresh:       make(chan struct{}, 1),
+		switcher:      switcher,
+		kubeClientSet: kubeClientset,
 	}
 }
 
@@ -112,7 +112,7 @@ func (w *Watcher) OnAdd(obj interface{}) {
 	}
 
 	w.configsMu.Lock()
-	w.configs[v.ObjectMeta.Name] = acp.ConfigFromPolicy(v, w.clientSet)
+	w.configs[v.ObjectMeta.Name] = acp.ConfigFromPolicy(v, w.kubeClientSet)
 	w.configsMu.Unlock()
 
 	select {
@@ -132,7 +132,7 @@ func (w *Watcher) OnUpdate(_, newObj interface{}) {
 		return
 	}
 
-	cfg := acp.ConfigFromPolicy(v, w.clientSet)
+	cfg := acp.ConfigFromPolicy(v, w.kubeClientSet)
 
 	w.configsMu.Lock()
 	w.configs[v.ObjectMeta.Name] = cfg

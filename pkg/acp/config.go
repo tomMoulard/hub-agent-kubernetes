@@ -29,7 +29,7 @@ import (
 	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
 	kerror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	clientset "k8s.io/client-go/kubernetes"
 )
 
 // Config is the configuration of an Access Control Policy. It is used to setup ACP handlers.
@@ -40,7 +40,7 @@ type Config struct {
 }
 
 // ConfigFromPolicy returns an ACP configuration for the given policy.
-func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, clientset *kubernetes.Clientset) *Config {
+func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *clientset.Clientset) *Config {
 	switch {
 	case policy.Spec.JWT != nil:
 		jwtCfg := policy.Spec.JWT
@@ -118,9 +118,9 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, clientset *kubern
 		}
 
 		var oidcSecret oidcSecret
-		if oidcCfg.SecretName != "" && clientset != nil {
+		if oidcCfg.SecretName != "" && kubeClientset != nil {
 			var err error
-			oidcSecret, err = getOIDCSecret(oidcCfg.SecretName, policy.Namespace, clientset)
+			oidcSecret, err = getOIDCSecret(oidcCfg.SecretName, policy.Namespace, kubeClientset)
 			if err != nil {
 				log.Error().Err(err).Msg("getOIDCSecret")
 				return &Config{}
@@ -136,8 +136,8 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, clientset *kubern
 	}
 }
 
-func getOIDCSecret(secretName, namespace string, clientset *kubernetes.Clientset) (oidcSecret, error) {
-	if clientset == nil {
+func getOIDCSecret(secretName, namespace string, kubeClientset *clientset.Clientset) (oidcSecret, error) {
+	if kubeClientset == nil {
 		return oidcSecret{}, errors.New("missing kubernetes client")
 	}
 
@@ -145,7 +145,7 @@ func getOIDCSecret(secretName, namespace string, clientset *kubernetes.Clientset
 		namespace = "default"
 	}
 
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	secret, err := kubeClientset.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil && !kerror.IsNotFound(err) {
 		return oidcSecret{}, fmt.Errorf("get secret: %w", err)
 	}
