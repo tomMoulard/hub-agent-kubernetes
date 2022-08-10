@@ -126,7 +126,15 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 				return &Config{}
 			}
 			conf.OIDC.ClientSecret = oidcSecret.ClientSecret
+
+			if conf.OIDC.StateCookie == nil {
+				conf.OIDC.StateCookie = &oidc.AuthStateCookie{}
+			}
 			conf.OIDC.StateCookie.Secret = oidcSecret.StateCookieKey
+
+			if conf.OIDC.Session == nil {
+				conf.OIDC.Session = &oidc.AuthSession{}
+			}
 			conf.OIDC.Session.Secret = oidcSecret.StateCookieKey
 		}
 
