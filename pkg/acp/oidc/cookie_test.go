@@ -36,7 +36,7 @@ func TestCookieSessionStore_Delete(t *testing.T) {
 	}, RandrMock{}, 200)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest("GET", "http://foo.bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://foo.bar", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "test-name",
 		Value: "value1",
@@ -77,7 +77,7 @@ func TestCookieSessionStore_RemoveCookieOnlyRemovesOurCookie(t *testing.T) {
 	}, RandrMock{}, 200)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest("GET", "http://foo.bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://foo.bar", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "test-name",
 		Value: "value1",
@@ -196,7 +196,7 @@ func TestCookieSessionStore_Get(t *testing.T) {
 	}, RandrMock{}, 200)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest("GET", "http://foo.bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://foo.bar", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "test-name",
 		Value: "AQEBAQEBAQEBAQEBAQEBAQPCeonj6H8bgW-y-xdlkLmaN-_ouVkUUzkkP0fZQDzye_iK2BBiaG6t",
@@ -217,7 +217,7 @@ func TestCookieSessionStore_GetHandlesChunkedCookies(t *testing.T) {
 	}, RandrMock{}, 200)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest("GET", "http://foo.bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://foo.bar", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "test-name-1",
 		Value: "AQEBAQEBAQEBAQEBAQEBAQPCeo",
@@ -246,7 +246,7 @@ func TestCookieSessionStore_GetReturnsNilIfNoSessionExists(t *testing.T) {
 	}, RandrMock{}, 200)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest("GET", "http://foo.bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://foo.bar", nil)
 
 	sess, err := store.Get(req)
 
