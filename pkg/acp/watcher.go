@@ -27,6 +27,7 @@ import (
 	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
 	hubclientset "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/clientset/versioned"
 	hubinformer "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/informers/externalversions"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
@@ -191,7 +192,6 @@ func buildAccessControlPolicySpec(a ACP) hubv1alpha1.AccessControlPolicySpec {
 	switch {
 	case a.OIDC != nil:
 		spec.OIDC = &hubv1alpha1.AccessControlOIDC{
-			SecretName:     a.OIDC.SecretName,
 			ClientSecret:   a.OIDC.ClientSecret,
 			Issuer:         a.OIDC.Issuer,
 			ClientID:       a.OIDC.ClientID,
@@ -202,6 +202,14 @@ func buildAccessControlPolicySpec(a ACP) hubv1alpha1.AccessControlPolicySpec {
 			ForwardHeaders: a.OIDC.ForwardHeaders,
 			Claims:         a.OIDC.Claims,
 		}
+
+		if a.OIDC.Secret != nil {
+			spec.OIDC.Secret = &corev1.SecretReference{
+				Name:      a.OIDC.Secret.Name,
+				Namespace: a.OIDC.Secret.Namespace,
+			}
+		}
+
 		if a.OIDC.StateCookie != nil {
 			spec.OIDC.StateCookie = &hubv1alpha1.StateCookie{
 				Secret:   a.OIDC.StateCookie.Secret,

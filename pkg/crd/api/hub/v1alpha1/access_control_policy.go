@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -90,9 +91,9 @@ type AccessControlOIDC struct {
 	Issuer   string `json:"issuer,omitempty"`
 	ClientID string `json:"clientId,omitempty"`
 	TLS      *TLS   `json:"tls,omitempty"`
-	// SecretName is the name of the referenced Kubernetes Secret to specify the acp secret data.
-	SecretName   string `json:"secretName,omitempty"`
-	ClientSecret string `json:"clientSecret,omitempty"`
+
+	Secret       *corev1.SecretReference `json:"secret,omitempty"`
+	ClientSecret string                  `json:"clientSecret,omitempty"`
 
 	RedirectURL string            `json:"redirectUrl,omitempty"`
 	LogoutURL   string            `json:"logoutUrl,omitempty"`

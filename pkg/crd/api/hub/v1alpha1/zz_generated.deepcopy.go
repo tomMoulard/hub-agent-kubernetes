@@ -22,6 +22,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -32,6 +33,11 @@ func (in *AccessControlOIDC) DeepCopyInto(out *AccessControlOIDC) {
 		in, out := &in.TLS, &out.TLS
 		*out = new(TLS)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Secret != nil {
+		in, out := &in.Secret, &out.Secret
+		*out = new(v1.SecretReference)
+		**out = **in
 	}
 	if in.AuthParams != nil {
 		in, out := &in.AuthParams, &out.AuthParams

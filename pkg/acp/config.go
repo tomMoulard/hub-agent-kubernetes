@@ -76,7 +76,6 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 		oidcCfg := policy.Spec.OIDC
 		conf := &Config{
 			OIDC: &oidc.Config{
-				SecretName:     oidcCfg.SecretName,
 				ClientSecret:   oidcCfg.ClientSecret,
 				Issuer:         oidcCfg.Issuer,
 				ClientID:       oidcCfg.ClientID,
@@ -87,6 +86,13 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 				ForwardHeaders: oidcCfg.ForwardHeaders,
 				Claims:         oidcCfg.Claims,
 			},
+		}
+
+		if oidcCfg.Secret != nil {
+			conf.OIDC.Secret = &oidc.SecretReference{
+				Name:      oidcCfg.Secret.Name,
+				Namespace: oidcCfg.Secret.Namespace,
+			}
 		}
 
 		if oidcCfg.StateCookie != nil {
@@ -118,9 +124,9 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 		}
 
 		var oidcSecret oidcSecret
-		if oidcCfg.SecretName != "" && kubeClientset != nil {
+		if oidcCfg.Secret != nil && oidcCfg.Secret.Name != "" && kubeClientset != nil {
 			var err error
-			oidcSecret, err = getOIDCSecret(oidcCfg.SecretName, policy.Namespace, kubeClientset)
+			oidcSecret, err = getOIDCSecret(oidcCfg.Secret.Name, oidcCfg.Secret.Namespace, kubeClientset)
 			if err != nil {
 				log.Error().Err(err).Msg("getOIDCSecret")
 				return &Config{}

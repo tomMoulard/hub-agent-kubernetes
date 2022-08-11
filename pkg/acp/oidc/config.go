@@ -30,7 +30,7 @@ type Config struct {
 	Issuer       string
 	ClientID     string
 	ClientSecret string
-	SecretName   string
+	Secret       *SecretReference
 	TLS          *TLS
 
 	RedirectURL string
@@ -45,6 +45,13 @@ type Config struct {
 	// Claims defines an expression to perform validation on the ID token. For example:
 	//     Equals(`grp`, `admin`) && Equals(`scope`, `deploy`)
 	Claims string
+}
+
+// SecretReference represents a Secret Reference. It has enough information to retrieve secret
+// in any namespace.
+type SecretReference struct {
+	Name      string `json:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // AuthStateCookie carries the state cookie configuration.
