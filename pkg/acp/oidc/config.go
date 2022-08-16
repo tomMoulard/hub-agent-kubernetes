@@ -47,11 +47,11 @@ type Config struct {
 	Claims string
 }
 
-// SecretReference represents a Secret Reference. It has enough information to retrieve secret
-// in any namespace.
+// SecretReference represents a Secret Reference.
+// It has enough information to retrieve secret in any namespace.
 type SecretReference struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	Name      string
+	Namespace string
 }
 
 // AuthStateCookie carries the state cookie configuration.

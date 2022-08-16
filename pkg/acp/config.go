@@ -72,8 +72,8 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 		}
 
 	case policy.Spec.OIDC != nil:
-
 		oidcCfg := policy.Spec.OIDC
+
 		conf := &Config{
 			OIDC: &oidc.Config{
 				ClientSecret:   oidcCfg.ClientSecret,
@@ -151,10 +151,6 @@ func ConfigFromPolicy(policy *hubv1alpha1.AccessControlPolicy, kubeClientset *cl
 }
 
 func getOIDCSecret(secretName, namespace string, kubeClientset *clientset.Clientset) (oidcSecret, error) {
-	if kubeClientset == nil {
-		return oidcSecret{}, errors.New("missing kubernetes client")
-	}
-
 	if namespace == "" {
 		namespace = "default"
 	}

@@ -219,6 +219,7 @@ func buildAccessControlPolicySpec(a ACP) hubv1alpha1.AccessControlPolicySpec {
 				Path:     a.OIDC.StateCookie.Path,
 			}
 		}
+
 		if a.OIDC.Session != nil {
 			spec.OIDC.Session = &hubv1alpha1.Session{
 				Secret:   a.OIDC.Session.Secret,
@@ -229,12 +230,14 @@ func buildAccessControlPolicySpec(a ACP) hubv1alpha1.AccessControlPolicySpec {
 				Refresh:  a.OIDC.Session.Refresh,
 			}
 		}
+
 		if a.OIDC.TLS != nil {
 			spec.OIDC.TLS = &hubv1alpha1.TLS{
 				CABundle:           a.OIDC.TLS.CABundle,
 				InsecureSkipVerify: a.OIDC.TLS.InsecureSkipVerify,
 			}
 		}
+
 	case a.JWT != nil:
 		spec.JWT = &hubv1alpha1.AccessControlPolicyJWT{
 			SigningSecret:              a.JWT.SigningSecret,
