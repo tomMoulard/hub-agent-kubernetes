@@ -1,4 +1,4 @@
-.PHONY: clean lint test build \
+.PHONY: clean lint test build build-portal \
 		publish publish-latest image image-dev multi-arch-image-%
 
 BIN_NAME := hub-agent-kubernetes
@@ -25,9 +25,12 @@ clean:
 test: clean
 	go test -v -race -cover ./...
 
-build: clean
+build: clean build-portal
 	@echo Version: $(VERSION) $(BUILD_DATE)
-	CGO_ENABLED=0 go build -trimpath -ldflags '-X "github.com/traefik/hub-agent-kubernetes/pkg/version.date=${BUILD_DATE}" -X "github.com/traefik/hub-agent-kubernetes/pkg/version.version=${VERSION}" -X "github.com/traefik/hub-agent-kubernetes/pkg/version.commit=${SHA}"' -o ${OUTPUT} ${MAIN_DIRECTORY}
+	CGO_ENABLED=0 go build -v -trimpath -ldflags '-X "github.com/traefik/hub-agent-kubernetes/pkg/version.date=${BUILD_DATE}" -X "github.com/traefik/hub-agent-kubernetes/pkg/version.version=${VERSION}" -X "github.com/traefik/hub-agent-kubernetes/pkg/version.commit=${SHA}"' -o ${OUTPUT} ${MAIN_DIRECTORY}
+
+build-portal:
+	@make -C $(CURDIR)/portal dist
 
 image: export GOOS := linux
 image: export GOARCH := amd64
@@ -40,7 +43,7 @@ image-dev: build
 	docker build -t $(BIN_NAME):dev . -f ./dev.Dockerfile
 
 dev: image-dev
-	k3d image import $(BIN_NAME):dev --cluster=k3s-default-hub
+	k3d image import $(BIN_NAME):dev --cluster=k3s-default
 	kubectl patch deployment -n hub-agent hub-agent-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-controller","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'
 	kubectl patch deployment -n hub-agent hub-agent-auth-server -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-auth-server","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'
 	kubectl patch deployment -n hub-agent hub-agent-tunnel -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-tunnel","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'
