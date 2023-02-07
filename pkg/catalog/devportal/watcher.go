@@ -216,7 +216,6 @@ func (w *Watcher) deleteCatalog(name string) {
 	}
 
 	delete(w.hostCatalogs, c.DevPortalDomain)
-
 	delete(w.catalogs, c.Name)
 }
 
