@@ -22,7 +22,7 @@ lint:
 clean:
 	rm -rf cover.out
 
-test: clean
+test: clean build-portal
 	go test -v -race -cover ./...
 
 build: clean build-portal
@@ -43,7 +43,7 @@ image-dev: build
 	docker build -t $(BIN_NAME):dev . -f ./dev.Dockerfile
 
 dev: image-dev
-	k3d image import $(BIN_NAME):dev --cluster=k3s-default
+	k3d image import $(BIN_NAME):dev --cluster=k3s-default-hub
 	kubectl patch deployment -n hub-agent hub-agent-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-controller","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'
 	kubectl patch deployment -n hub-agent hub-agent-auth-server -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-auth-server","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'
 	kubectl patch deployment -n hub-agent hub-agent-tunnel -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-tunnel","image":"$(BIN_NAME):dev","imagePullPolicy":"Never"}]}}}}'

@@ -272,3 +272,5 @@ issues:
     - path: portal/embed.go
       linters:
         - gochecknoglobals
+    - path: portal/embed.go
+      text: "pattern dist: no matching files found"
