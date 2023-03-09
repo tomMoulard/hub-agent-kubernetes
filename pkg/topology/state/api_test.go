@@ -23,7 +23,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
 	hubkubemock "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/clientset/versioned/fake"
 	traefikkubemock "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/traefik/clientset/versioned/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -178,13 +177,6 @@ func setupClientSets(t *testing.T, hubObjects []runtime.Object) (*kubemock.Clien
 	t.Helper()
 
 	kubeClient := kubemock.NewSimpleClientset()
-	// Faking having Hub CRDs installed on cluster.
-	kubeClient.Resources = append(kubeClient.Resources, &metav1.APIResourceList{
-		GroupVersion: hubv1alpha1.SchemeGroupVersion.String(),
-		APIResources: []metav1.APIResource{
-			{Kind: "APIPortal"},
-		},
-	})
 	traefikClient := traefikkubemock.NewSimpleClientset()
 
 	hubClient := hubkubemock.NewSimpleClientset()
