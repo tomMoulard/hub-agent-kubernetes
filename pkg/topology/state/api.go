@@ -103,3 +103,25 @@ func (f *Fetcher) getAPICollections() (map[string]*APICollection, error) {
 
 	return result, nil
 }
+
+func (f *Fetcher) getAPIPortals() (map[string]*APIPortal, error) {
+	apiPortals, err := f.hub.Hub().V1alpha1().APIPortals().Lister().List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*APIPortal)
+	for _, apiPortal := range apiPortals {
+		a := &APIPortal{
+			Name:          apiPortal.Name,
+			Description:   apiPortal.Spec.Description,
+			APIGateway:    apiPortal.Spec.APIGateway,
+			CustomDomains: apiPortal.Spec.CustomDomains,
+			HubDomain:     apiPortal.Status.HubDomain,
+		}
+
+		result[a.Name] = a
+	}
+
+	return result, nil
+}

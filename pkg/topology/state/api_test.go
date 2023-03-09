@@ -19,7 +19,6 @@ package state
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,6 +27,7 @@ import (
 	hubkubemock "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/clientset/versioned/fake"
 	traefikkubemock "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/traefik/clientset/versioned/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	kubemock "k8s.io/client-go/kubernetes/fake"
 )
 
@@ -119,6 +119,29 @@ func TestFetcher_GetAPIAccesses(t *testing.T) {
 	require.NoError(t, err)
 
 	got, err := f.getAPIAccesses()
+	require.NoError(t, err)
+
+	assert.Equal(t, want, got)
+}
+
+func TestFetcher_GetAPIPortals(t *testing.T) {
+	want := map[string]*APIPortal{
+		"portal": {
+			Name:          "portal",
+			Description:   "description",
+			APIGateway:    "api-gateway",
+			CustomDomains: []string{"example.com", "example.org"},
+			HubDomain:     "hub.example.com",
+		},
+	}
+
+	objects := loadK8sObjects(t, "fixtures/api/portal.yml")
+	kubeClient, traefikClient, hubClient := setupClientSets(objects)
+
+	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
+	require.NoError(t, err)
+
+	got, err := f.getAPIPortals()
 	require.NoError(t, err)
 
 	assert.Equal(t, want, got)
