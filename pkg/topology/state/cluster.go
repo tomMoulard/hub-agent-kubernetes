@@ -22,6 +22,7 @@ import (
 	"github.com/traefik/hub-agent-kubernetes/pkg/httpclient"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Cluster describes a Cluster.
@@ -307,4 +308,14 @@ type OpenAPISpec struct {
 	Path     string                 `json:"path,omitempty"`
 	Port     *APIServiceBackendPort `json:"port,omitempty"`
 	Protocol string                 `json:"protocol,omitempty"`
+}
+
+// APIAccess holds the definition of an APIAccess configuration.
+type APIAccess struct {
+	Name   string            `json:"name"`
+	Labels map[string]string `json:"labels,omitempty"`
+
+	Groups                []string              `json:"groups"`
+	APISelector           *metav1.LabelSelector `json:"apiSelector"`
+	APICollectionSelector *metav1.LabelSelector `json:"apiCollectionSelector"`
 }

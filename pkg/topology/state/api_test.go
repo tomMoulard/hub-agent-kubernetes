@@ -70,3 +70,44 @@ func TestFetcher_GetAPIs(t *testing.T) {
 
 	assert.Equal(t, want, got)
 }
+
+func TestFetcher_GetAPIAccesses(t *testing.T) {
+	want := map[string]*APIAccess{
+		"access": {
+			Name:   "access",
+			Labels: map[string]string{"key": "value"},
+			Groups: []string{"group1", "group2"},
+			APISelector: &metav1.LabelSelector{
+				MatchExpressions: []metav1.LabelSelectorRequirement{{
+					Key:      "key",
+					Operator: metav1.LabelSelectorOpIn,
+					Values:   []string{"value1", "value2", "value3"},
+				}},
+			},
+			APICollectionSelector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{"key": "value"},
+			},
+		},
+	}
+
+	objects := loadK8sObjects(t, "fixtures/api/access.yml")
+
+	kubeClient := kubemock.NewSimpleClientset()
+	// Faking having Hub CRDs installed on cluster.
+	kubeClient.Resources = append(kubeClient.Resources, &metav1.APIResourceList{
+		GroupVersion: hubv1alpha1.SchemeGroupVersion.String(),
+		APIResources: []metav1.APIResource{
+			{Kind: "APIPortal"},
+		},
+	})
+	traefikClient := traefikkubemock.NewSimpleClientset()
+	hubClient := hubkubemock.NewSimpleClientset(objects...)
+
+	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
+	require.NoError(t, err)
+
+	got, err := f.getAPIAccesses()
+	require.NoError(t, err)
+
+	assert.Equal(t, want, got)
+}

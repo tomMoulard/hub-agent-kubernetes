@@ -60,3 +60,25 @@ func (f *Fetcher) getAPIs() (map[string]*API, error) {
 
 	return result, nil
 }
+
+func (f *Fetcher) getAPIAccesses() (map[string]*APIAccess, error) {
+	apiAccesses, err := f.hub.Hub().V1alpha1().APIAccesses().Lister().List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*APIAccess)
+	for _, apiAccess := range apiAccesses {
+		a := &APIAccess{
+			Name:                  apiAccess.Name,
+			Labels:                apiAccess.Labels,
+			Groups:                apiAccess.Spec.Groups,
+			APISelector:           apiAccess.Spec.APISelector,
+			APICollectionSelector: apiAccess.Spec.APICollectionSelector,
+		}
+
+		result[a.Name] = a
+	}
+
+	return result, nil
+}

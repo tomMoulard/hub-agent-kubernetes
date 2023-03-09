@@ -115,6 +115,7 @@ func watchAll(ctx context.Context, clientSet clientset.Interface, traefikClientS
 
 	if apiAvailable {
 		hubFactory.Hub().V1alpha1().APIs().Informer()
+		hubFactory.Hub().V1alpha1().APIAccesses().Informer()
 	}
 
 	kubernetesFactory.Start(ctx.Done())
@@ -180,6 +181,11 @@ func (f *Fetcher) FetchState(ctx context.Context) (*Cluster, error) {
 	}
 
 	cluster.APIs, err = f.getAPIs()
+	if err != nil {
+		return nil, err
+	}
+
+	cluster.APIAccesses, err = f.getAPIAccesses()
 	if err != nil {
 		return nil, err
 	}
