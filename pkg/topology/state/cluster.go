@@ -31,6 +31,8 @@ type Cluster struct {
 	Services              map[string]*Service             `json:"services"`
 	AccessControlPolicies map[string]*AccessControlPolicy `json:"accessControlPolicies"`
 	EdgeIngresses         map[string]*EdgeIngress         `json:"edgeIngresses"`
+	APIs                  map[string]*API                 `json:"apis"`
+	APIAccesses           map[string]*APIAccess           `json:"apiAccesses"`
 }
 
 // ResourceMeta represents the metadata which identify a Kubernetes resource.
@@ -274,4 +276,35 @@ type EdgeIngressService struct {
 // EdgeIngressACP configures the ACP to use on the Ingress.
 type EdgeIngressACP struct {
 	Name string `json:"name"`
+}
+
+// API holds the definition of an API configuration.
+type API struct {
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Labels    map[string]string `json:"labels,omitempty"`
+
+	PathPrefix string     `json:"pathPrefix"`
+	Service    APIService `json:"service"`
+}
+
+// APIService configures the service to exposed on the edge.
+type APIService struct {
+	Name        string                `json:"name"`
+	Port        APIServiceBackendPort `json:"port"`
+	OpenAPISpec OpenAPISpec           `json:"openApiSpec,omitempty"`
+}
+
+// APIServiceBackendPort is the service port being referenced.
+type APIServiceBackendPort struct {
+	Name   string `json:"name"`
+	Number int32  `json:"number"`
+}
+
+// OpenAPISpec defines the OpenAPI spec of an API.
+type OpenAPISpec struct {
+	URL      string                 `json:"url,omitempty"`
+	Path     string                 `json:"path,omitempty"`
+	Port     *APIServiceBackendPort `json:"port,omitempty"`
+	Protocol string                 `json:"protocol,omitempty"`
 }

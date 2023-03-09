@@ -25,6 +25,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/rs/zerolog/log"
+	hubv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/hub/v1alpha1"
 	traefikv1alpha1 "github.com/traefik/hub-agent-kubernetes/pkg/crd/api/traefik/v1alpha1"
 	hubclientset "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/clientset/versioned"
 	hubinformer "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/hub/informers/externalversions"
@@ -107,6 +108,15 @@ func watchAll(ctx context.Context, clientSet clientset.Interface, traefikClientS
 	hubFactory.Hub().V1alpha1().AccessControlPolicies().Informer()
 	hubFactory.Hub().V1alpha1().EdgeIngresses().Informer()
 
+	apiAvailable, err := isAPIAvailable(clientSet.Discovery())
+	if err != nil {
+		return nil, fmt.Errorf("check presence of Hub API resources: %w", err)
+	}
+
+	if apiAvailable {
+		hubFactory.Hub().V1alpha1().APIs().Informer()
+	}
+
 	kubernetesFactory.Start(ctx.Done())
 	hubFactory.Start(ctx.Done())
 	traefikFactory.Start(ctx.Done())
@@ -169,6 +179,11 @@ func (f *Fetcher) FetchState(ctx context.Context) (*Cluster, error) {
 		return nil, err
 	}
 
+	cluster.APIs, err = f.getAPIs()
+	if err != nil {
+		return nil, err
+	}
+
 	return &cluster, nil
 }
 
@@ -198,6 +213,27 @@ func hasTraefikCRDs(clientSet discovery.DiscoveryInterface) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func isAPIAvailable(clientSet discovery.DiscoveryInterface) (bool, error) {
+	crdList, err := clientSet.ServerResourcesForGroupVersion(hubv1alpha1.SchemeGroupVersion.String())
+	if err != nil {
+		if kerror.IsNotFound(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	log.Info().Interface("crds", crdList.APIResources).Msg("crds list")
+
+	for _, resource := range crdList.APIResources {
+		if resource.Kind == "APIPortal" {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func objectKey(name, ns string) string {
