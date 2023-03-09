@@ -36,6 +36,7 @@ type Cluster struct {
 	APIAccesses           map[string]*APIAccess           `json:"apiAccesses"`
 	APICollections        map[string]*APICollection       `json:"apiCollections"`
 	APIPortals            map[string]*APIPortal           `json:"apiPortals"`
+	APIGateways           map[string]*APIGateway          `json:"apiGateways"`
 }
 
 // ResourceMeta represents the metadata which identify a Kubernetes resource.
@@ -337,6 +338,16 @@ type APIPortal struct {
 
 	Description   string   `json:"description,omitempty"`
 	APIGateway    string   `json:"apiGateway"`
+	CustomDomains []string `json:"customDomains,omitempty"`
+	HubDomain     string   `json:"hubDomain"`
+}
+
+// APIGateway holds the definition of an APIGateway resource.
+type APIGateway struct {
+	Name   string            `json:"name"`
+	Labels map[string]string `json:"labels,omitempty"`
+
+	APIAccesses   []string `json:"apiAccesses,omitempty"`
 	CustomDomains []string `json:"customDomains,omitempty"`
 	HubDomain     string   `json:"hubDomain"`
 }

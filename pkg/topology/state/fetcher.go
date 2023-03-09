@@ -118,6 +118,7 @@ func watchAll(ctx context.Context, clientSet clientset.Interface, traefikClientS
 		hubFactory.Hub().V1alpha1().APIAccesses().Informer()
 		hubFactory.Hub().V1alpha1().APICollections().Informer()
 		hubFactory.Hub().V1alpha1().APIPortals().Informer()
+		hubFactory.Hub().V1alpha1().APIGateways().Informer()
 	}
 
 	kubernetesFactory.Start(ctx.Done())
@@ -198,6 +199,11 @@ func (f *Fetcher) FetchState(ctx context.Context) (*Cluster, error) {
 	}
 
 	cluster.APIPortals, err = f.getAPIPortals()
+	if err != nil {
+		return nil, err
+	}
+
+	cluster.APIGateways, err = f.getAPIGateways()
 	if err != nil {
 		return nil, err
 	}

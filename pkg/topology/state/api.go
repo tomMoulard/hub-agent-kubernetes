@@ -125,3 +125,25 @@ func (f *Fetcher) getAPIPortals() (map[string]*APIPortal, error) {
 
 	return result, nil
 }
+
+func (f *Fetcher) getAPIGateways() (map[string]*APIGateway, error) {
+	gateways, err := f.hub.Hub().V1alpha1().APIGateways().Lister().List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*APIGateway)
+	for _, gateway := range gateways {
+		c := &APIGateway{
+			Name:          gateway.Name,
+			Labels:        gateway.Labels,
+			APIAccesses:   gateway.Spec.APIAccesses,
+			CustomDomains: gateway.Spec.CustomDomains,
+			HubDomain:     gateway.Status.HubDomain,
+		}
+
+		result[c.Name] = c
+	}
+
+	return result, nil
+}

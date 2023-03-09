@@ -28,6 +28,7 @@ import (
 	traefikkubemock "github.com/traefik/hub-agent-kubernetes/pkg/crd/generated/client/traefik/clientset/versioned/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	kubemock "k8s.io/client-go/kubernetes/fake"
 )
 
@@ -51,7 +52,7 @@ func TestFetcher_GetAPIs(t *testing.T) {
 	}
 
 	objects := loadK8sObjects(t, "fixtures/api/api.yml")
-	kubeClient, traefikClient, hubClient := setupClientSets(objects)
+	kubeClient, traefikClient, hubClient := setupClientSets(t, objects)
 
 	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
 	require.NoError(t, err)
@@ -82,7 +83,7 @@ func TestFetcher_getAPICollections(t *testing.T) {
 	}
 
 	objects := loadK8sObjects(t, "fixtures/api/api_collection.yml")
-	kubeClient, traefikClient, hubClient := setupClientSets(objects)
+	kubeClient, traefikClient, hubClient := setupClientSets(t, objects)
 
 	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
 	require.NoError(t, err)
@@ -113,7 +114,7 @@ func TestFetcher_GetAPIAccesses(t *testing.T) {
 	}
 
 	objects := loadK8sObjects(t, "fixtures/api/access.yml")
-	kubeClient, traefikClient, hubClient := setupClientSets(objects)
+	kubeClient, traefikClient, hubClient := setupClientSets(t, objects)
 
 	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
 	require.NoError(t, err)
@@ -136,7 +137,7 @@ func TestFetcher_GetAPIPortals(t *testing.T) {
 	}
 
 	objects := loadK8sObjects(t, "fixtures/api/portal.yml")
-	kubeClient, traefikClient, hubClient := setupClientSets(objects)
+	kubeClient, traefikClient, hubClient := setupClientSets(t, objects)
 
 	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
 	require.NoError(t, err)
@@ -147,7 +148,35 @@ func TestFetcher_GetAPIPortals(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
-func setupClientSets(hubObjects []runtime.Object) (*kubemock.Clientset, *traefikkubemock.Clientset, *hubkubemock.Clientset) {
+func TestFetcher_GetAPIGateways(t *testing.T) {
+	want := map[string]*APIGateway{
+		"gateway": {
+			Name:        "gateway",
+			Labels:      map[string]string{"key": "value"},
+			APIAccesses: []string{"access"},
+			CustomDomains: []string{
+				"api.example.com",
+				"www.api.example.com",
+			},
+			HubDomain: "majestic-beaver-123.hub-traefik.io",
+		},
+	}
+
+	objects := loadK8sObjects(t, "fixtures/api/gateway.yml")
+	kubeClient, traefikClient, hubClient := setupClientSets(t, objects)
+
+	f, err := watchAll(context.Background(), kubeClient, traefikClient, hubClient, "v1.20.1")
+	require.NoError(t, err)
+
+	got, err := f.getAPIGateways()
+	require.NoError(t, err)
+
+	assert.Equal(t, want, got)
+}
+
+func setupClientSets(t *testing.T, hubObjects []runtime.Object) (*kubemock.Clientset, *traefikkubemock.Clientset, *hubkubemock.Clientset) {
+	t.Helper()
+
 	kubeClient := kubemock.NewSimpleClientset()
 	// Faking having Hub CRDs installed on cluster.
 	kubeClient.Resources = append(kubeClient.Resources, &metav1.APIResourceList{
@@ -157,7 +186,22 @@ func setupClientSets(hubObjects []runtime.Object) (*kubemock.Clientset, *traefik
 		},
 	})
 	traefikClient := traefikkubemock.NewSimpleClientset()
-	hubClient := hubkubemock.NewSimpleClientset(hubObjects...)
+
+	hubClient := hubkubemock.NewSimpleClientset()
+	for _, obj := range hubObjects {
+		if obj.GetObjectKind().GroupVersionKind().Kind == "APIGateway" {
+			err := hubClient.Tracker().Create(schema.GroupVersionResource{
+				Group:    "hub.traefik.io",
+				Version:  "v1alpha1",
+				Resource: "apigateways",
+			}, obj, "")
+			require.NoError(t, err)
+			continue
+		}
+
+		err := hubClient.Tracker().Add(obj)
+		require.NoError(t, err)
+	}
 
 	return kubeClient, traefikClient, hubClient
 }
