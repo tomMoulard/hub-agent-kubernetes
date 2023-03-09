@@ -82,3 +82,24 @@ func (f *Fetcher) getAPIAccesses() (map[string]*APIAccess, error) {
 
 	return result, nil
 }
+
+func (f *Fetcher) getAPICollections() (map[string]*APICollection, error) {
+	collections, err := f.hub.Hub().V1alpha1().APICollections().Lister().List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*APICollection)
+	for _, collection := range collections {
+		c := &APICollection{
+			Name:        collection.Name,
+			Labels:      collection.Labels,
+			PathPrefix:  collection.Spec.PathPrefix,
+			APISelector: collection.Spec.APISelector,
+		}
+
+		result[c.Name] = c
+	}
+
+	return result, nil
+}

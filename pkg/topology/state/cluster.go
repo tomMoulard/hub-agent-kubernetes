@@ -34,6 +34,7 @@ type Cluster struct {
 	EdgeIngresses         map[string]*EdgeIngress         `json:"edgeIngresses"`
 	APIs                  map[string]*API                 `json:"apis"`
 	APIAccesses           map[string]*APIAccess           `json:"apiAccesses"`
+	APICollections        map[string]*APICollection       `json:"apiCollections"`
 }
 
 // ResourceMeta represents the metadata which identify a Kubernetes resource.
@@ -318,4 +319,13 @@ type APIAccess struct {
 	Groups                []string              `json:"groups"`
 	APISelector           *metav1.LabelSelector `json:"apiSelector"`
 	APICollectionSelector *metav1.LabelSelector `json:"apiCollectionSelector"`
+}
+
+// APICollection holds the definition of an APICollection resource.
+type APICollection struct {
+	Name   string            `json:"name"`
+	Labels map[string]string `json:"labels,omitempty"`
+
+	PathPrefix  string               `json:"pathPrefix,omitempty"`
+	APISelector metav1.LabelSelector `json:"apiSelector"`
 }
