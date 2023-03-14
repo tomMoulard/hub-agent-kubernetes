@@ -112,7 +112,7 @@ func (f *Fetcher) getAPIPortals() (map[string]*APIPortal, error) {
 
 	result := make(map[string]*APIPortal)
 	for _, apiPortal := range apiPortals {
-		a := &APIPortal{
+		p := &APIPortal{
 			Name:          apiPortal.Name,
 			Description:   apiPortal.Spec.Description,
 			APIGateway:    apiPortal.Spec.APIGateway,
@@ -120,7 +120,7 @@ func (f *Fetcher) getAPIPortals() (map[string]*APIPortal, error) {
 			HubDomain:     apiPortal.Status.HubDomain,
 		}
 
-		result[a.Name] = a
+		result[p.Name] = p
 	}
 
 	return result, nil
